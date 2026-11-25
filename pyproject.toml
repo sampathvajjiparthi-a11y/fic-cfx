@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fic"
+version = "0.1.0"
+description = "Fashion Image Classification with Counterfactual XAI (KF7029 MSc project)"
+requires-python = ">=3.10"
+authors = [{ name = "Sai Sampath Srinivas Vajjiparthi" }]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 110
+src = ["src", "scripts"]

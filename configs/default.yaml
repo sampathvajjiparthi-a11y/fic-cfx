@@ -1,0 +1,96 @@
+# =============================================================
+# FIC-CFX: Fashion Image Classification with Counterfactual XAI
+# Main experiment configuration. Change values here, not in code.
+# =============================================================
+
+project:
+  name: fic-cfx
+  output_dir: outputs          # all models, images, CSVs and figures go here
+  data_dir: data/raw           # datasets are downloaded / placed here
+  device: auto                 # auto | cpu | cuda | mps
+  seeds: [0, 1, 2, 3, 4]       # approval form: 5 runs per model
+  split_seed: 42               # approval form: validation split and image selection
+
+# -------------------------------------------------------------
+# Datasets (supervisor note: one SMALL and one BIG dataset)
+# -------------------------------------------------------------
+datasets:
+  small:
+    name: fashion_mnist        # 70,000 grey 28x28 clothing images, 10 classes
+  big:
+    # Approved form uses CIFAR-10. Supervisor note asks for fashion image
+    # classification, so a bigger fashion dataset may replace it.
+    # Options: cifar10 | image_folder
+    name: cifar10
+    # Used only when name = image_folder (e.g. Kaggle "Fashion Product Images"):
+    # put images in data/raw/<folder_name>/<class_name>/*.jpg
+    folder_name: fashion_products
+    image_size: 64             # images are resized to this size (square)
+    grayscale: false
+  val_fraction: 0.1            # 10% of training set kept for validation
+  batch_size: 128
+  num_workers: 2
+
+# -------------------------------------------------------------
+# Models (supervisor note: self-built CNN, ResNet-18, classical ML)
+# -------------------------------------------------------------
+models:
+  cnn:                         # self-built CNN, trained from scratch
+    epochs: 20
+    lr: 0.001
+    weight_decay: 0.0001
+    patience: 4                # early stopping on validation loss
+  resnet18:                    # ImageNet-pretrained, fine-tuned
+    pretrained: true
+    input_size: 224            # images resized inside the model wrapper
+    epochs: 8
+    lr: 0.0003
+    weight_decay: 0.0001
+    patience: 3
+  logistic_regression:
+    C: 1.0
+    max_iter: 1000
+  random_forest:
+    n_estimators: 300
+    max_depth: null
+    n_jobs: -1
+
+# -------------------------------------------------------------
+# Autoencoder (plausibility score + class prototypes)
+# -------------------------------------------------------------
+autoencoder:
+  latent_dim: 32
+  epochs: 15
+  lr: 0.001
+
+# -------------------------------------------------------------
+# Counterfactual explanations
+# -------------------------------------------------------------
+counterfactuals:
+  n_per_class: 100             # approval form: 1,000 images (100 per class)
+  target: second_best          # target class = model's second choice
+  wachter:                     # Method A: Wachter, Mittelstadt and Russell (2018)
+    steps: 500
+    lr: 0.01
+    lambda_init: 0.1           # weight on the distance term
+    confidence: 0.5            # stop when target prob is above this
+  prototype:                   # Method B: Van Looveren and Klaise (2021)
+    steps: 500
+    lr: 0.01
+    beta: 0.1                  # L1 weight (elastic net)
+    gamma: 1.0                 # autoencoder reconstruction weight
+    theta: 1.0                 # prototype loss weight
+    k_neighbours: 20           # encodings used to build each class prototype
+    confidence: 0.5
+  blackbox:                    # used for Random Forest (no gradients)
+    max_iter: 50
+    n_samples: 64
+
+# -------------------------------------------------------------
+# Evaluation
+# -------------------------------------------------------------
+evaluation:
+  sparsity_eps: 0.01           # a pixel counts as changed if |delta| > 0.01
+  alpha: 0.05                  # Holm-Bonferroni family-wise level
+  bootstrap: 2000              # resamples for 95% confidence intervals
+  practical_r: 0.3             # medium effect size threshold

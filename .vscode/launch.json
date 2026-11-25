@@ -1,0 +1,75 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "0. Smoke test (whole pipeline, quick)",
+      "type": "debugpy", "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_pipeline.py",
+      "args": ["--dataset", "small", "--quick", "--skip", "resnet18"],
+      "cwd": "${workspaceFolder}", "console": "integratedTerminal"
+    },
+    {
+      "name": "1. Check data (small)",
+      "type": "debugpy", "request": "launch",
+      "program": "${workspaceFolder}/scripts/01_check_data.py",
+      "args": ["--dataset", "small"],
+      "cwd": "${workspaceFolder}", "console": "integratedTerminal"
+    },
+    {
+      "name": "2. Train classical ML (LR + RF)",
+      "type": "debugpy", "request": "launch",
+      "program": "${workspaceFolder}/scripts/02_train_classical.py",
+      "args": ["--dataset", "small"],
+      "cwd": "${workspaceFolder}", "console": "integratedTerminal"
+    },
+    {
+      "name": "3a. Train self-built CNN",
+      "type": "debugpy", "request": "launch",
+      "program": "${workspaceFolder}/scripts/03_train_deep.py",
+      "args": ["--dataset", "small", "--model", "cnn"],
+      "cwd": "${workspaceFolder}", "console": "integratedTerminal"
+    },
+    {
+      "name": "3b. Fine-tune ResNet-18",
+      "type": "debugpy", "request": "launch",
+      "program": "${workspaceFolder}/scripts/03_train_deep.py",
+      "args": ["--dataset", "small", "--model", "resnet18"],
+      "cwd": "${workspaceFolder}", "console": "integratedTerminal"
+    },
+    {
+      "name": "4. Train autoencoder",
+      "type": "debugpy", "request": "launch",
+      "program": "${workspaceFolder}/scripts/04_train_autoencoder.py",
+      "args": ["--dataset", "small"],
+      "cwd": "${workspaceFolder}", "console": "integratedTerminal"
+    },
+    {
+      "name": "5. Evaluate models (RQ1)",
+      "type": "debugpy", "request": "launch",
+      "program": "${workspaceFolder}/scripts/05_evaluate_models.py",
+      "args": ["--dataset", "small"],
+      "cwd": "${workspaceFolder}", "console": "integratedTerminal"
+    },
+    {
+      "name": "6. XAI local + global maps",
+      "type": "debugpy", "request": "launch",
+      "program": "${workspaceFolder}/scripts/06_explain_xai.py",
+      "args": ["--dataset", "small"],
+      "cwd": "${workspaceFolder}", "console": "integratedTerminal"
+    },
+    {
+      "name": "7. Counterfactuals: CNN + Wachter",
+      "type": "debugpy", "request": "launch",
+      "program": "${workspaceFolder}/scripts/07_generate_counterfactuals.py",
+      "args": ["--dataset", "small", "--model", "cnn", "--method", "wachter"],
+      "cwd": "${workspaceFolder}", "console": "integratedTerminal"
+    },
+    {
+      "name": "8. Statistics (RQ2, RQ3)",
+      "type": "debugpy", "request": "launch",
+      "program": "${workspaceFolder}/scripts/08_analyse_counterfactuals.py",
+      "args": ["--dataset", "small"],
+      "cwd": "${workspaceFolder}", "console": "integratedTerminal"
+    }
+  ]
+}

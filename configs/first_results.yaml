@@ -1,0 +1,69 @@
+# Short run for a first look at results (1 seed, fewer epochs, 100 images).
+# Use configs/default.yaml for the real experiment.
+project:
+  name: fic-cfx
+  output_dir: outputs
+  data_dir: data/raw
+  device: auto
+  seeds:
+  - 0
+  split_seed: 42
+datasets:
+  small:
+    name: fashion_mnist
+  big:
+    name: cifar10
+    folder_name: fashion_products
+    image_size: 64
+    grayscale: false
+  val_fraction: 0.1
+  batch_size: 128
+  num_workers: 2
+models:
+  cnn:
+    epochs: 6
+    lr: 0.001
+    weight_decay: 0.0001
+    patience: 4
+  resnet18:
+    pretrained: true
+    input_size: 224
+    epochs: 8
+    lr: 0.0003
+    weight_decay: 0.0001
+    patience: 3
+  logistic_regression:
+    C: 1.0
+    max_iter: 1000
+  random_forest:
+    n_estimators: 150
+    max_depth: null
+    n_jobs: -1
+autoencoder:
+  latent_dim: 32
+  epochs: 6
+  lr: 0.001
+counterfactuals:
+  n_per_class: 10
+  target: second_best
+  wachter:
+    steps: 500
+    lr: 0.01
+    lambda_init: 0.1
+    confidence: 0.5
+  prototype:
+    steps: 500
+    lr: 0.01
+    beta: 0.1
+    gamma: 1.0
+    theta: 1.0
+    k_neighbours: 20
+    confidence: 0.5
+  blackbox:
+    max_iter: 50
+    n_samples: 64
+evaluation:
+  sparsity_eps: 0.01
+  alpha: 0.05
+  bootstrap: 2000
+  practical_r: 0.3

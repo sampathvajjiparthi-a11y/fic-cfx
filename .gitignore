@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Data and results (large; keep folders only)
+data/raw/*
+!data/raw/.gitkeep
+outputs/**/*
+!outputs/**/.gitkeep
+
+# OS / editor
+.DS_Store
+Thumbs.db
