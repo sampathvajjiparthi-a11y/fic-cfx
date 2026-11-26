@@ -18,14 +18,13 @@ datasets:
   small:
     name: fashion_mnist        # 70,000 grey 28x28 clothing images, 10 classes
   big:
-    # Approved form uses CIFAR-10. Supervisor note asks for fashion image
-    # classification, so a bigger fashion dataset may replace it.
-    # Options: cifar10 | image_folder
-    name: cifar10
-    # Used only when name = image_folder (e.g. Kaggle "Fashion Product Images"):
-    # put images in data/raw/<folder_name>/<class_name>/*.jpg
-    folder_name: fashion_products
-    image_size: 64             # images are resized to this size (square)
+    # Supervisor (Nov 2026): use TWO datasets, chosen by the student.
+    # Big dataset = real colour product photos, e.g. Kaggle "Fashion Product Images (Small)".
+    # Prepare it first:  python scripts/00_prepare_fashion_products.py --source <unzipped folder>
+    # Options: image_folder | cifar10
+    name: image_folder
+    folder_name: fashion_products   # data/raw/fashion_products/<class_name>/*.jpg
+    image_size: 64                  # must match --size used in step 0 (divisible by 4)
     grayscale: false
   val_fraction: 0.1            # 10% of training set kept for validation
   batch_size: 128

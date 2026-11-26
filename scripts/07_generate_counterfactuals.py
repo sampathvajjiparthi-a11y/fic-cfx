@@ -2,7 +2,7 @@
 
   --method wachter     Method A, gradient-based (cnn, resnet18, logistic_regression)
   --method prototype   Method B, prototype-guided (cnn, resnet18, logistic_regression)
-  --method blackbox    prototype-guided without gradients (any model, needed for random_forest)
+  --method blackbox    prototype-guided without gradients (ALL four models; the only one for random_forest)
 
 Images: 100 per class that all chosen models classify correctly (seed 0).
 Target: the class each model ranks second.

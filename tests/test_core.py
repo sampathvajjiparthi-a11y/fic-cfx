@@ -91,3 +91,54 @@ def test_stats():
     import pandas as pd
     res = holm_correction(pd.DataFrame({"p": [0.01, 0.04, 0.5]}))
     assert list(res.significant) == [True, False, False]
+
+
+def test_blackbox_counterfactual_on_torch_model():
+    """Supervisor: CFX for all models, so black-box must also run on CNN / LR / ResNet."""
+    from fic.counterfactuals import blackbox_counterfactual
+    torch.manual_seed(0)
+    model = SimpleCNN(1, 2).eval()
+    ae = ConvAutoencoder(1, 28, 8).eval()
+    X = torch.rand(60, 1, 28, 28)
+    with torch.no_grad():
+        labels = model(X).argmax(1)
+        bank = PrototypeBank(ae.encode(X), labels, X)
+    present = labels.unique()
+    if len(present) < 2:      # random net predicts one class only: nothing to flip to
+        return
+    x = X[labels == present[0]][:2]
+    target = torch.full((len(x),), int(present[1]))
+    cf = blackbox_counterfactual(model, ae, bank, x, target, max_iter=5)
+    assert cf.valid.all()
+
+
+def test_prepare_fashion_products(tmp_path):
+    """Step 0 turns a Kaggle-style styles.csv + images/ folder into class folders."""
+    import csv
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    from PIL import Image
+    src = tmp_path / "kaggle" / "myntradataset"
+    (src / "images").mkdir(parents=True)
+    with open(src / "styles.csv", "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["id", "articleType"])
+        for i in range(30):
+            Image.new("RGB", (60, 80), (i * 8, 100, 50)).save(src / "images" / f"{i}.jpg")
+            w.writerow([i, ["Tshirts", "Watches", "Heels"][i % 3]])
+    root = Path(__file__).resolve().parents[1]
+    out = "pytest_fashion_tmp"
+    subprocess.run([sys.executable, str(root / "scripts" / "00_prepare_fashion_products.py"),
+                    "--source", str(tmp_path / "kaggle"), "--top", "2", "--size", "32",
+                    "--out-name", out], check=True, capture_output=True)
+    folder = root / "data" / "raw" / out
+    try:
+        classes = sorted(p.name for p in folder.iterdir() if p.is_dir())
+        assert len(classes) == 2
+        img = Image.open(next((folder / classes[0]).glob("*.jpg")))
+        assert img.size == (32, 32)
+    finally:
+        import shutil
+        shutil.rmtree(folder, ignore_errors=True)

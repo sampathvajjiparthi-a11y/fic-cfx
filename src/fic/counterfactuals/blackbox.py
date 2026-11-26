@@ -1,6 +1,9 @@
-"""Black-box prototype counterfactuals for models without gradients (Random Forest).
+"""Black-box prototype counterfactuals: works for ANY model (supervisor: CFX for all models).
 
-Model-agnostic version of Method B: it only calls predict_proba().
+Model-agnostic version of Method B: it only asks the model for its predicted class,
+never for gradients. It is the only method that runs on Random Forest, and it is
+also run on Logistic Regression, the CNN and ResNet-18, so all four models can be
+compared with the same method (RQ3).
   1. Find the target-class prototype in autoencoder latent space and decode it.
   2. Line search: x' = x + t * (prototype - x); find the smallest t in [0, 1]
      that makes the model predict the target class (bisection).
@@ -20,7 +23,12 @@ from .base import CFBatch
 from .prototype import PrototypeBank
 
 
+@torch.no_grad()
 def _predict(model, x: torch.Tensor) -> np.ndarray:
+    """Predicted classes from a torch model (logits) or a scikit-learn style model."""
+    if isinstance(model, torch.nn.Module):
+        model.eval()
+        return model(x).argmax(1).cpu().numpy()
     return np.asarray(model.predict(x.detach().cpu().numpy().reshape(len(x), -1)))
 
 

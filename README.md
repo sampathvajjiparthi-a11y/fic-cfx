@@ -9,9 +9,9 @@ type of model?
 
 The project compares:
 * **Models:** Logistic Regression, Random Forest, a self-built CNN, and a pretrained ResNet-18
-* **Datasets:** a small one (Fashion-MNIST) and a big one (set in `configs/default.yaml`)
+* **Datasets:** a small one (Fashion-MNIST, grey 28 x 28) and a big one (real colour product photos, e.g. Kaggle Fashion Product Images)
 * **XAI:** local (Grad-CAM, saliency) and global (weight maps, importance, class-average Grad-CAM) explanations
-* **Counterfactuals:** gradient-based (Wachter et al., 2018) vs prototype-guided (Van Looveren and Klaise, 2021), plus a black-box version for Random Forest
+* **Counterfactuals for ALL four models:** gradient-based (Wachter et al., 2018), prototype-guided (Van Looveren and Klaise, 2021), and a model-agnostic black-box method that runs on every model (the only one possible for Random Forest)
 
 See [`docs/architecture.md`](docs/architecture.md) for the full design.
 
@@ -58,6 +58,7 @@ or from the terminal:
 
 | Step | Command | What it does |
 |---|---|---|
+| 0 | `python scripts/00_prepare_fashion_products.py --source <folder>` | prepare the big dataset (once) |
 | 1 | `python scripts/01_check_data.py --dataset small` | load data, save sample images |
 | 2 | `python scripts/02_train_classical.py --dataset small` | train Logistic Regression and Random Forest |
 | 3a | `python scripts/03_train_deep.py --dataset small --model cnn` | train the self-built CNN |
@@ -65,7 +66,7 @@ or from the terminal:
 | 4 | `python scripts/04_train_autoencoder.py --dataset small` | autoencoder for plausibility and prototypes |
 | 5 | `python scripts/05_evaluate_models.py --dataset small` | **RQ1**: test accuracy + McNemar tests |
 | 6 | `python scripts/06_explain_xai.py --dataset small` | local and global XAI maps |
-| 7 | `python scripts/07_generate_counterfactuals.py --dataset small --model cnn --method wachter` | counterfactuals for one model and method |
+| 7 | `python scripts/07_generate_counterfactuals.py --dataset small --model cnn --method wachter` | counterfactuals for one model and method (`wachter`, `prototype` or `blackbox`) |
 | 8 | `python scripts/08_analyse_counterfactuals.py --dataset small` | **RQ2, RQ3**: statistics |
 
 Or run everything at once:
@@ -79,20 +80,26 @@ Useful options for every script:
 * `--quick` tiny smoke test
 * `--config configs/first_results.yaml` short run for a first look at the results
 
-## 3. Changing the big dataset
+## 3. The big dataset (step 0)
 
-The approved form uses CIFAR-10. To use a bigger **fashion** dataset instead
-(for example Fashion Product Images from Kaggle):
+Your supervisor asked for two datasets. The second one is a real-photo fashion dataset.
 
-1. Put the images in `data/raw/fashion_products/<class_name>/*.jpg` (one folder per class).
-2. In `configs/default.yaml` set:
-   ```yaml
-   big:
-     name: image_folder
-     folder_name: fashion_products
-     image_size: 64
+1. Download **Fashion Product Images (Small)** from Kaggle and unzip it anywhere.
+2. Prepare it (keeps the 10 most common classes, max 2,000 images each, resized to 64 x 64):
+   ```bash
+   python scripts/00_prepare_fashion_products.py --source ~/Downloads/fashion-product-images-small
    ```
-3. Run `python scripts/run_pipeline.py --dataset big`.
+   Pick your own classes with `--classes Tshirts Shirts Watches ...` and change the cap with `--max-per-class`.
+3. Check it: `python scripts/01_check_data.py --dataset big`
+4. Run everything: `python scripts/run_pipeline.py --dataset big`
+
+`configs/default.yaml` already points `datasets.big` at `data/raw/fashion_products`.
+To go back to CIFAR-10, set `datasets.big.name: cifar10`.
+
+## 3b. ResNet-18 on a free GPU (Google Colab)
+
+Open `notebooks/02_colab_gpu_run.ipynb` in Google Colab, choose **Runtime > Change runtime type > T4 GPU**,
+and run the cells. It clones this repository, trains ResNet-18 and saves the results to your Google Drive.
 
 ## 4. Where the results go
 

@@ -7,12 +7,12 @@ This project follows the supervisor's plan:
 | Supervisor note | Where it is in the code |
 |---|---|
 | Fashion Image Classification (FIC) | `fic.data` (Fashion-MNIST + a second dataset) |
-| Small / big dataset | `configs/default.yaml` → `datasets.small`, `datasets.big` |
+| Small / big dataset | Fashion-MNIST + Fashion Product Images (`scripts/00_prepare_fashion_products.py`, `datasets.big`) |
 | Model: CNN (self-built) | `fic.models.cnn.SimpleCNN` |
 | Model: ResNet-18 | `fic.models.resnet.ResNet18Classifier` (ImageNet pretrained, fine-tuned) |
 | Classical ML: Random Forest, Logistic Regression | `fic.models.classical` (scikit-learn) |
 | XAI: local and global explanations | `fic.xai.local`, `fic.xai.global_` |
-| CFX: different algorithms / tools | `fic.counterfactuals` (Wachter, prototype-guided, black-box) |
+| CFX for all models, compared (supervisor email, Nov 2026) | `fic.counterfactuals`: Wachter + prototype on LR, CNN, ResNet-18; black-box on all four |
 
 ## 1. Pipeline
 
@@ -80,10 +80,10 @@ Design rules:
 
 | Model | Type | Input | Explained with |
 |---|---|---|---|
-| Logistic Regression | classical, linear | flattened pixels | Wachter, Prototype (via an exact PyTorch copy), weight maps |
+| Logistic Regression | classical, linear | flattened pixels | Wachter, Prototype (via an exact PyTorch copy), Black-box, weight maps |
 | Random Forest | classical, trees | flattened pixels | Black-box prototype CF, pixel importance |
-| Self-built CNN | deep, from scratch | image | Wachter, Prototype, Grad-CAM |
-| ResNet-18 | deep, ImageNet pretrained | image (resized to 224) | Wachter, Prototype, Grad-CAM |
+| Self-built CNN | deep, from scratch | image | Wachter, Prototype, Black-box, Grad-CAM |
+| ResNet-18 | deep, ImageNet pretrained | image (resized to 224) | Wachter, Prototype, Black-box, Grad-CAM |
 
 Random Forest has no gradients, so the gradient-based methods cannot be used on it.
 `fic.counterfactuals.blackbox` gives a model-agnostic prototype method that only
@@ -105,7 +105,7 @@ calls `predict()`, so classical ML can still be compared.
 |---|---|---|
 | A. Gradient-based | Wachter et al. (2018) | smallest L1 change that flips the prediction |
 | B. Prototype-guided | Van Looveren and Klaise (2021) | Method A + elastic net + autoencoder + move towards a target-class prototype |
-| Black-box prototype | adapted from Method B | interpolate towards the target prototype, then remove unneeded changes |
+| Black-box prototype | adapted from Method B | interpolate towards the target prototype, then remove unneeded changes; runs on ALL models, so the four models are compared with the same method (RQ3) |
 
 ## 5. Evaluation (from the approved form)
 

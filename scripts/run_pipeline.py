@@ -41,8 +41,10 @@ def main():
     run("04_train_autoencoder.py", *common)
     run("05_evaluate_models.py", *common, "--models", *models)
     run("06_explain_xai.py", *common, "--models", *models)
+    # Supervisor: CFX for ALL models. Black-box runs on every model (same method for all,
+    # RQ3); the gradient methods run on every model that has gradients (RQ2).
     for m in models:
-        methods = ["blackbox"] if m == "random_forest" else ["wachter", "prototype"]
+        methods = ["blackbox"] if m == "random_forest" else ["wachter", "prototype", "blackbox"]
         for k in methods:
             run("07_generate_counterfactuals.py", *common, "--model", m, "--method", k,
                 "--select_from", *models)

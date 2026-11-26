@@ -12,7 +12,7 @@ datasets:
   small:
     name: fashion_mnist
   big:
-    name: cifar10
+    name: image_folder
     folder_name: fashion_products
     image_size: 64
     grayscale: false
